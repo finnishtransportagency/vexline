@@ -1,0 +1,164 @@
+{
+    "checkboxConfigs": {
+        "default": [
+            {
+                "value": "saveInput",
+                "label": "Säilytä alkuperäiset tieosoitteet (Näkyvät tulostiedostossa original-päätteellä)"
+            },
+            {
+                "value": "0",
+                "label": "Tieosoite"
+            },
+            {
+                "value": "2",
+                "label": "Tieosoite, sisältäen väylän luonne ja hallinnollinen luokka"
+            },
+            {
+                "value": "3",
+                "label": "Katuosoite"
+            },
+            {
+                "value":"4",
+                "label":"Alueet (urakka-alue, ELY, kunta, maakunta)"
+            },
+            {
+                "value":"5",
+                "label":"Piste- tai viivageometria (WKT)"
+            },
+            {
+                "value":"GPKG",
+                "label":"Piste- tai viivageometria (GeoPackage)"
+            }
+        ],
+        "path2": [
+            {
+                "value": "saveInput",
+                "label": "Säilytä alkuperäiset tieosoitteet (Näkyvät tulostiedostossa original-päätteellä)"
+            },
+            {
+                "value": "0",
+                "label": "Tieosoite"
+            },
+            {
+                "value": "2",
+                "label": "Tieosoite, sisältäen väylän luonne ja hallinnollinen luokka"
+            },
+            {
+                "value": "3",
+                "label": "Katuosoite"
+            },
+            {
+                "value":"4",
+                "label":"Alueet (urakka-alue, ELY, kunta, maakunta)"
+            },
+            {
+                "value":"5",
+                "label":"Piste- tai viivageometria (WKT)"
+            },
+            {
+                "value":"GPKG",
+                "label":"Piste- tai viivageometria (GeoPackage)"
+            }
+        ],
+        "path3": [
+            {
+                "value": "saveInput",
+                "label": "Säilytä alkuperäiset tieosoitteet (Näkyvät tulostiedostossa original-päätteellä)"
+            },
+            {
+                "value": "0",
+                "label": "Tieosoite"
+            },
+            {
+                "value": "1",
+                "label": "Pistekoordinaatit (x, y, z)"
+            },
+            {
+                "value": "2",
+                "label": "Tieosoite, sisältäen väylän luonne ja hallinnollinen luokka"
+            },
+            {
+                "value": "3",
+                "label": "Katuosoite"
+            },
+            {
+                "value":"4",
+                "label":"Alueet (urakka-alue, ELY, kunta, maakunta)"
+            },
+            {
+                "value":"5",
+                "label":"Piste- tai viivageometria (WKT)"
+            },
+            {
+                "value":"GPKG",
+                "label":"Piste- tai viivageometria (GeoPackage)"
+            },
+            {
+                "value":"6",
+                "label":"Lineaarilokaatio"
+            },
+            {
+                "value":"10",
+                "label":"Rataosoite"
+            }
+            
+        ]
+      
+    },
+
+    "cards": [
+        {
+            "title": "Koordinaattien muuntaminen",
+            "content": "Kun haluat muuntaa koordinaatteja esimerkiksi tie- ja katuosoitteeksi ja esittää ne kartalla.",
+            "link": "javascript:goToPage(1);",
+            "dataPath": "default",
+            "linkedCheckboxes": "default",
+            "desc": "Kun haluat muuntaa koordinaatteja esimerkiksi tie- ja katuosoitteeksi.",
+            "icon": "images/koordinaatit.svg",
+            "video": null,
+            "shortvideo": null,
+            "files": [
+                "excel_templates/tieosoite_piste_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_historiamuunnos_esimerkki.xlsx",
+                "excel_templates/koordinaatit_piste_esimerkki.xlsx",
+                "excel_templates/koordinaatit_vali_pakotettuna_tielle_esimerkki.xlsx"
+            ]
+        },
+        {
+            "title": "Tieosoitteiden muuntaminen",
+            "content": "Kun haluat muuntaa tieosoitteita ja esittää ne kartalla.",
+            "link": "javascript:goToPage(1);",
+            "dataPath": "path2",
+            "linkedCheckboxes": "path2",
+            "desc": "Kun haluat muuntaa tieosoitteita ja esittää ne kartalla.",
+            "icon": "images/tieosoiteikoni.svg",
+            "video": null,
+            "shortvideo": null,
+            "files": [
+                "excel_templates/tieosoite_piste_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_historiamuunnos_esimerkki.xlsx",
+                "excel_templates/koordinaatit_piste_esimerkki.xlsx",
+                "excel_templates/koordinaatit_vali_pakotettuna_tielle_esimerkki.xlsx"
+            ]
+        },
+        {
+            "title": "Haluan valita itse manuaalisesti",
+            "content": "Kun haluat valita vapaasti kaikista VKM-palvelun toiminnoista. (Kokeneille käyttäjille)",
+            "link": "javascript:goToPage(1);",
+            "dataPath": "path3",
+            "linkedCheckboxes": "path3",
+            "desc":"Kun haluat valita vapaasti kaikista VKM-palvelun toiminnoista.",
+            "icon":"images/manuaalinen.svg",
+            "shortvideo": null,
+            "files": [
+                "excel_templates/tieosoite_piste_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_esimerkki.xlsx",
+                "excel_templates/tieosoite_vali_historiamuunnos_esimerkki.xlsx",
+                "excel_templates/koordinaatit_piste_esimerkki.xlsx",
+                "excel_templates/koordinaatit_vali_pakotettuna_tielle_esimerkki.xlsx"
+            ]
+        }
+    ]
+}

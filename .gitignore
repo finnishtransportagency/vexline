@@ -1,0 +1,8 @@
+# gitignore
+.vscode/
+venv
+node_modules/
+bower_components/
+lib/convertable_files
+package-lock.json
+.env

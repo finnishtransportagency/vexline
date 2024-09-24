@@ -1,0 +1,673 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Vexline</title>
+    <meta charset="utf-8" />
+    <!-- <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css" /> -->
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"/>
+    <!-- <script src="bower_components/jquery/dist/jquery.min.js"></script> -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script> <!-- TODO: Katotaan miten eroaa bäkkärin XLSX-kirjastosta -->
+    <script src="js/defs.js"></script>
+    <script src="js/main.js"></script>
+    <style>
+      html * {
+          font-family: 'Exo', sans-serif;
+      }
+  </style>
+</head>
+<body>
+
+<!--Common header for all pages-->
+
+  <header class="logo">
+    <img src="images/20230927_Vexline-02.svg" alt="vexline" onclick="resetURL(0)">
+    <img src="images/vayla_sivussa_fi_sv_white.svg" alt="vayla" >
+    <button class="user-guide-button bi bi-info-circle-fill"></button>
+  </header>
+
+  <!--Front page-->
+
+  <div id="page0" class="page">
+      <div style="margin-top: 20px;" class="lead">
+        <h1>Vexline</h1>
+          <p class="ml-3">Vexline on Viitekehysmuunnin-rajapinnan käyttöliittymä, jonka avulla voidaan suorittaa VKM-rajapintakutsuja CSV- tai XLSX-taulukon muodossa. Tulostiedoston saa vietyä suoraan paikkatieto-ohjelmistoon, jossa aineisto tai data näkyy kartalla. Vexline korvaa aikaisemmin käytössä olleet Tatun ja VKM-Excelin. <br/><br/> Vexline tekee muunnoksen tiedoston otsikkoriviltä löytyvien VKM-hakuparametrien avulla, jotka voivat olla missä tahansa järjestyksessä ja kombinaatiossa. Hakurivien muut sarakkeet säilytetään muuttumattomina ja liitetään myöhemmin vastaaviin tulosriveihin. Tiedoston muunnos voi epäonnistua kokonaan tai osittain, mikäli hakuparametrit eivät ole VKM:n ohjeiden mukaisia tai niiden arvoja ei pysty muuntaa. <br/><br/> Pääset helpoimmin alkuun valitsemalla jonkin alla esitellyistä yleisesti käytetyistä muunninesimerkeistä. Halutessasi voit myös valita itse manuaalisen syöttötavan, jossa kaikki muunnokset ovat käytettävissäsi. <b>Muunnettavan tiedoston maksimi rivilukumäärä on toistaiseksi 50 000, ja Vexlinen käyttämä koordinaattijärjestelmä on ETRS89/TM35FIN(E,N).</b></p>
+         <br/><br/>
+
+          <div class="cards" id="cards-container"></div>
+  </div>
+  <footer class="footer"></footer>
+  </div>
+
+    <!--First page-->
+
+<div id="page1" class="page">
+  <div class="path-indicator">
+    <div class="path-card active" data-path="default">
+      <p><img src="images/koordinaatit.svg" alt="Koordinaattien muuttaminen"> Koordinaattien muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path2">
+      <p><img src="images/tieosoiteikoni.svg" alt="Tieosoitteiden muuttaminen"> Tieosoitteiden muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path3">
+      <p><img src="images/manuaalinen.svg" alt="Manuaalinen muuttaminen"> Haluan valita itse manuaalisesti</p>
+    </div>
+  </div>
+  <div class="lead">
+    <h1></h1>
+    <video id="videoPlayer"controls>
+      <source id="videoSource" src="" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    
+    <b><p id="linkToVideos"></p></b>
+    <p id="conversion-desc"></p>
+
+<div class="page-indicator">
+  <div class="indicator-ball active" id="ball1"></div>
+  <div class="indicator-line"></div>
+  <div class="indicator-ball" id="ball2"></div>
+  <div class="indicator-line"></div>
+  <div class="indicator-ball" id="ball3"></div>
+  <div class="indicator-line"></div>
+  <div class="indicator-ball" id="ball4"></div>
+</div>
+
+    <h3>1. Valitse muunnoksen palautusarvot. <span class="glyphicon glyphicon-info-sign"></span></h3>
+    <p>Palautusarvot määrittävät muunnoksen viitekehykset, kuten tieosoite, koordinaatit ja geometria, joissa muunnettu paikkatietodata esitetään.</p>
+
+    <h3>Lisätietoa ajoradoista:</h3>
+    <p><b>Ajoratatietoa ei tarvitse määrittää muunnostiedostossa</b>, ellei halua muunnosten kohdistuvan juuri tiettyihin ajoratoihin, tai muunnettava tiedosto muuten sisältää ajoratakohtaisia kohteita. Jos tiedostossa ei ole ajorata-kenttää eli muunnettavien kohteiden ajoratatietoja ei ole määritetty,  mutta kohteiden sijainnit osuvat moniajorataisiin tieosuuksiin, Vexline kohdistaa kohteet oikeille ajoradoille. Eli esim. yhdestä hakurivistä voi syntyä useampi tulosrivi, mikäli kohteen sijainti osuu kaksiajorataiselle tieosuudelle.</p>
+    
+    <h3>Lisätietoa väylän luonteesta:</h3>
+    <p> 
+      Väylän luonne on ajoratatiedon tapaan valinnainen ns. tarkentava VKM-parametri, jolla voidaan rajata muunnokset tiettyihin tienumeroihin. 
+      Esim. <i>vaylan_luonne = 1</i> sisältää tienumerot 1–19 999 eli maantiet ja <i>vaylan_luonne = 7</i> taas kevyen liikenteen väylät 70 000–99 999. 
+      Se on hyödyllinen etenkin koordinaatti–tieosoite-muunnoksessa, jossa annetulle koordinaattipisteelle haetaan lähin tieosoite 100 metrin säteeltä. Luettelo vaylan_luonne-parametrin eri arvoista löytyy <a href="//vayla.fi/documents/25230764/39766119/Viitekehysmuunnin+rajapintakuvaus.pdf/771c824f-c168-0973-e03c-881c1b04e3a9/Viitekehysmuunnin+rajapintakuvaus.pdf?t=1696316684442" target="_blank">Viitekehysmuuntimen rajapintakuvauksesta</a>, (PDF-tiedoston) sivuilta 31–32.
+    </p>
+
+    <p style="font-weight: 700; padding-bottom: 5px;" >Palautusarvot:</p>
+    <div id="palautusarvotContainer">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="2">
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="3">
+        </label>
+      </div>
+    </div>
+
+    <p style="padding-bottom: 5px;"><a href="./instructions/1512_2023_Vexline_GPKG_Qgis.pdf" target="_blank">Erilliset ohjeet GeoPackagen vientiin QGIS-ohjelmaan.</a></p>
+
+    <p style="font-weight: 700; padding-bottom: 5px;">Tarkentavat ja rajaavat parametrit <span style="font-weight: 100; font-size: 0.9em;">(Ylikirjoittavat tiedoston samannimiset VKM-kentät ja ovat täysin valinnaisia.)</span>:</p>
+    <div id="tarkentavatArvotContainer">
+      <label style="font-weight: 100;">
+        ajorata (<span style="font-size: 0.9em;">Ajoratanumero(t), jolla muunnos rajataan.</span>):
+      </label>
+      <input type="text" style="width: 100px;" name="ajorata" maxlength="5" placeholder="Esim. 0,1">
+      
+      <label style="font-weight: 100;">
+        vaylan_luonne (<span style="font-size: 0.9em;">Tienumeroväli, jolla muunnos rajataan. Lisää aiheesta <a href="//vayla.fi/documents/25230764/39766119/Viitekehysmuunnin+rajapintakuvaus.pdf/771c824f-c168-0973-e03c-881c1b04e3a9/Viitekehysmuunnin+rajapintakuvaus.pdf?t=1696316684442" target="_blank">Viitekehysmuuntimen rajapintakuvauksen</a> sivuilla 31–32.</span>):
+      </label>
+      <input type="text" name="vaylan_luonne" maxlength="3" placeholder="Esim. 11 (eli valtatiet 1–39).">
+
+      <label style="font-weight: 100;">
+        sade (<span style="font-size: 0.9em;">Säde, jolla etsitään koordinaattipisteen lähin tieosoite. Käytetään vain koordinaatti–tieosoite-muunnoksissa</span>): 
+      </label>
+      <input type="text" name="sade" maxlength="3" placeholder="Esim. 50.">
+
+      <label style="font-weight: 100;">
+        tilannepvm (<span style="font-size: 0.9em;">Muunnettavan aineiston tieverkon ajanhetki. Oletusarvona nykyhetki.</span>): 
+      </label>
+      <input type="text" name="tilannepvm" maxlength="10" placeholder="DD.MM.YYYY">
+
+      <label style="font-weight: 100;">
+        kohdepvm (<span style="font-size: 0.9em;">Tieverkon ajanhetki, johon aineisto muunnetaan. Oletusarvona nykyhetki.</span>): 
+      </label>
+      <input type="text" name="kohdepvm" maxlength="10" placeholder="DD.MM.YYYY">
+
+    </div>
+
+    <div class="btn-container">
+      <button onclick="resetURL(0)" class="returnbtn">Palaa</button>
+      <button onclick="goToPage(2)" class="continuebtn">Jatka</button>
+    </div>
+  </div>
+  <footer class="footer"></footer>
+</div>
+
+
+<!--Second page-->
+
+<div id="page2" class="page">
+  <div class="path-indicator">
+    <div class="path-card active" data-path="default">
+      <p><img src="images/koordinaatit.svg" alt="Koordinaattien muuttaminen"> Koordinaattien muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path2">
+      <p><img src="images/tieosoiteikoni.svg" alt="Tieosoitteiden muuttaminen"> Tieosoitteiden muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path3">
+      <p><img src="images/manuaalinen.svg" alt="Manuaalinen muuttaminen"> Haluan valita itse manuaalisesti</p>
+    </div>
+  </div>
+  <div class="lead">
+    <h1></h1><br/>
+
+    <div class="page-indicator">
+      <div class="indicator-ball " id="ball1"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball active" id="ball2"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball3"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball4"></div>
+    </div>
+
+    <br><h3>2. Lähetä tiedosto muunnettavaksi <span class="glyphicon glyphicon-info-sign"></span></h3>
+    
+    <br/><h3>Vaatimukset:</h3>
+    <p>
+      <b>Tiedoston nimessä ei saa olla skandeja (Å, Ä ja Ö)</b>
+      
+      <br/><br/><b>CSV-tiedoston erotimerkin on oltava ";" (puolipiste).</b><br/><br/>
+      
+      <b>Sarake, jonka nimessä on "pvm" ja sisältää "dd.mm.yyyy"-muotoisia päivämääriä, muutetaan "datetime"-tyypiksi, jos tulostiedoston formaatiksi on valittu GeoPackage.</b><br/><br/> 
+      
+      <b>
+        Muunnettavan tiedoston tieosoitekenttien tulee seurata Velhon, Tierekisterin tai/ja Viitekehysmuuntimen tieosoitesyntaksia. Tieosoiteparametreja <i>(={tie/tienumero}, {aosa/alkuosa/osa}, {ajr/ajoratanumero/ajorata}, {aet/alkuetaisyys/etaisyys}, {losa/loppuosa/osa_loppu}...)</i> voi sekoittaa keskenään, eikä kirjainten koolla ole merkitystä. 
+        Esim. <i>Tienumero, AOSA, alkuetaisyys, osa_loppu, Let.</i> Parametrien ei tarvitse olla tietyissä paikoissa tai järjestyksessä ja niitä voi yhdistellä vapaasti.
+      </b>
+
+      <br/><br/><b>
+        Aiemmin mainittujen tieosoitekenttien ja muiden muunnosparametrien lisäksi muunnettava aineisto voi sisältää vapaamuotoisia kenttiä, joiden nimiä, formaattia tai arvoja ei sovelluksessa rajoiteta.
+        Nämä kentät prosessi säilyttää muuttumattomina ja liittää myöhemmin vastaaviin tulosriveihin.
+      </b><br/>
+      
+      <br/>Lataa halutessasi esimerkkitiedosto, josta voi ottaa mallia. Tiedostot sisältävät eri parametrien käyttötarkoituksia tarkentavia kommentteja.
+      <b>Esimerkkitiedostoja ei tarvitse käyttää tiedostopohjina vaan muunnoksen tekemiseen voi käyttää omaa tiedostoa</b>, jossa voi olla erilaisia VKM-parametrien ja muunnettavien kohteiden lisäominaisuuksien kombinaatioita. 
+      Esim. Lisäominaisuus1, tie, Lisäominaisuus2, etaisyys, osa, ajorata.<br/>
+      <br/><b>CSV on suositelluin tiedostomuoto Vexlinelle syötettäväksi, jos käyttää aineiston käsittelyyn muita sovelluksia kuin Excel.</b>
+      <br/><br/>
+      Kuvia esimerkkitiedostoista. Vihreällä värillä on merkattu tieosoitemuunnokseen vaikuttavat kentät, sinisellä käyttäjän lisäämät vapaamuotoiset kentät:
+      <figure>
+        <img src="./images/tieosoite_vali.jpg" class="example-images">
+        <figcaption class="figure-caption">Tieosoiteväli.</figcaption>
+      </figure>
+      <figure>
+        <img src="./images/tieosoite_vali_historiamuunnos.jpg" class="example-images">
+        <figcaption class="figure-caption">Tieosoitevälin historiamuunnos.</figcaption>
+      </figure>
+      <figure>
+        <img src="./images/tieosoite_piste.jpg" class="example-images">
+        <figcaption class="figure-caption">Tieosoitepiste.</figcaption>
+      </figure>
+      <figure>
+        <img src="./images/koordinaatit_piste.jpg" class="example-images">
+        <figcaption class="figure-caption">Koordinaattipiste.</figcaption>
+      </figure>
+      <figure>
+        <img src="./images/koordinaatit_vali_pakotettuna_tielle.jpg" class="example-images">
+        <figcaption class="figure-caption">Koordinaattiväli pakotettuna tietylle tielle.</figcaption>
+      </figure>
+      
+    </p>
+    
+
+    <div id="fileLinksContainer" style="text-decoration: underline; color: #0064AF; margin-left: 25px;" class="h4">
+    </div>
+
+    <div>
+      <h2 style="text-align: center;">Lataa tiedosto</h2>
+      <form method="post" action="upload" id="upload" name="upload" enctype="multipart/form-data">
+        <label class="uploadbtn" for="file">
+          <img src="images/upload-solid.svg" alt="Upload File" />
+          <input type="file" name="file" id="file" style="display: none;"/>
+        </label>
+        <div id="fileContent"></div>
+        <div class="btn-container">
+          <button type="button" onclick="resetURL(1)" class="returnbtn">Palaa</button>
+          <button id="continue" type="submit" class="continuebtn">Jatka</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <footer class="footer"></footer>
+</div>
+
+
+<!-- Third page -->
+
+<div id="page3" class="page">
+  <div class="path-indicator">
+    <div class="path-card active" data-path="default">
+      <p><img src="images/koordinaatit.svg" alt="Koordinaattien muuttaminen"> Koordinaattien muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path2">
+      <p><img src="images/tieosoiteikoni.svg" alt="Tieosoitteiden muuttaminen"> Tieosoitteiden muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path3">
+      <p><img src="images/manuaalinen.svg" alt="Manuaalinen muuttaminen"> Haluan valita itse manuaalisesti</p>
+    </div>
+  </div>
+  <div class="lead">
+    <h1></h1><br/>
+
+    <div class="page-indicator">
+      <div class="indicator-ball " id="ball1"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball active" id="ball2"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball3"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball4"></div>
+    </div>
+
+    <h3>2. Lähetä tiedosto muunnettavaksi <span class="glyphicon glyphicon-info-sign"></span></h3>
+        <div style="margin-bottom: 50px;" class="modal-content">
+          <div class="modal-header">
+            <img id="file-import-solid" src="images/file-import-solid.svg" alt="convert"> Lataus
+          </div>
+            <div id="fileDetails">
+            </div>
+          </div>
+    </div>
+    <div class="btn-container">
+      <button onclick="goToPage(2)" class="returnbtn">Palaa</button>
+      <button onclick="goToPage(4)" class="continuebtn">Muunna</button>
+    </div></br>
+  <footer class="footer"></footer>
+</div>
+
+<!-- Fourth page -->
+
+<div id="page4" class="page">
+  <div class="path-indicator">
+    <div class="path-card active" data-path="default">
+      <p><img src="images/koordinaatit.svg" alt="Koordinaattien muuttaminen"> Koordinaattien muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path2">
+      <p><img src="images/tieosoiteikoni.svg" alt="Tieosoitteiden muuttaminen"> Tieosoitteiden muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path3">
+      <p><img src="images/manuaalinen.svg" alt="Manuaalinen muuttaminen"> Haluan valita itse manuaalisesti</p>
+    </div>
+  </div>
+  <div class="lead">
+    <h1></h1><br/>
+
+    <div class="page-indicator">
+      <div class="indicator-ball" id="ball1"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball2"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball active" id="ball3"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball4"></div>
+    </div>
+
+    <div id="ready">
+      <h3>3. Muunnoksen tulos <span class="glyphicon glyphicon-info-sign"></span></h3>
+    </div>
+    <!-- Defines two modals for "Muunnetut tiedot" and "Virheelliset hakurivit" -->
+    <div class="modal-content">
+      <div class="modal-header">
+        <img id="file-import-solid" src="images/file-import-solid.svg" alt="convert"> Muunnokset
+    </div>
+  <div class="convert-rows">
+    <div id="fileDetailsGreen"></div>
+        <a class="circle-button" href="#" id="downloadRows">
+            <img src="images/file-export-solid.svg" id="file-export-solid" alt="file export">
+            <span></span>
+        </a>
+  </div>
+    
+  <div class="convert-rows">
+    <div id="fileDetailsYellow"></div>
+    <a class="circle-button" href="#" id="downloadErrorRows">
+      <span>
+        <img src="images/file-export-solid.svg" id="file-export-solid" alt="file export">
+        CSV</span>
+    </a>
+  </div>
+  <div class="convert-rows">
+    <div id="fileDetailsRed"></div>
+  </div>
+  <div class="alert alert-info hidden" role="alert" id="loading">
+    <div class="loader"></div>
+  </div>
+  </div>
+  
+    <div class="btn-container">
+      <button onclick="goToPage(3)" class="returnbtn">Palaa</button>
+      <button onclick="resetURL(0)" class="returnbtn">TEE UUSI MUUNNOS</button>
+      <button onclick="resetURL(5)" class="continuebtn">Jatkokäsittelyohjeet</button>
+    </div>
+  </div>
+  <footer class="footer"></footer>
+</div>
+
+<!-- Fifth Page -->
+
+<div id="page5" class="page">
+  <div class="path-indicator">
+    <div class="path-card active" data-path="default">
+      <p><img src="images/koordinaatit.svg" alt="Koordinaattien muuttaminen"> Koordinaattien muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path2">
+      <p><img src="images/tieosoiteikoni.svg" alt="Tieosoitteiden muuttaminen"> Tieosoitteiden muuntaminen</p>
+    </div>
+    <div class="path-card active" data-path="path3">
+      <p><img src="images/manuaalinen.svg" alt="Manuaalinen muuttaminen"> Haluan valita itse manuaalisesti</p>
+    </div>
+  </div>
+  <div class="lead">
+    <h1></h1><br/>
+
+    <div class="page-indicator">
+      <div class="indicator-ball" id="ball1"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball2"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball" id="ball3"></div>
+      <div class="indicator-line"></div>
+      <div class="indicator-ball active" id="ball4"></div>
+    </div>
+
+    <h3>4. Jatkokäsittelyohjeet <span class="glyphicon glyphicon-info-sign"></span></h3>
+    <h2>Vexline muunnoksia voi hyödyntää myös QGIS:sissa:</h2>
+    <ul>
+      <li>1. Suorita CSV- tai XLSX-taulukon muunnos ja talleta tulostiedosto.</li>
+      <li>2. Avaa QGIS ja valitse sopiva projekti.</li>
+      <li>3. CSV: Avaa tietolähteiden hallinta ja valitse Eroteltu teksti. GPKG: Valitse GeoPackage.</li>
+      <li>4. Valitse tulostiedosto (.csv tai .gpkg) tiedoston nimeksi ja valitse muunnetuille csv-tiedoille sopivat asetukset.</li>
+      <li>5. Paina lisää ja tietojen pitäisi ilmestyä projektiin.</li>
+    </ul><br/>
+
+    <video id="videoPlayer5"controls>
+      <source id="videoSource5" src="" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <p id="linkToVideos"></p>
+
+    <div class="btn-container">
+      <button onclick="goToPage(4)" class="returnbtn">Palaa</button>
+      <button onclick="resetURL(0)" class="continuebtn">TEE UUSI MUUNNOS</button>
+    </div>
+    </div>
+  </div>
+  <footer class="footer"></footer>
+</div>
+
+
+<div id="myModal" class="modal">
+  <div class="guide-modal-content">
+    <div id="content"></div>
+  </div>
+</div>
+
+    <script>
+function resetURL(index) {
+  // Your existing code to go to page 0
+  goToPage(index);
+
+  // Code to reset the URL
+  window.history.pushState({}, document.title, appPath + "/");
+
+  var fileInput = document.querySelector('input[type="file"]');
+  fileInput.value = '';
+
+  // Code to clear the file name display
+  var fileContentDiv = document.getElementById('fileContent');
+  fileContentDiv.innerText = '';
+}
+
+      // Fetch the JSON data when the page loads
+      window.onload = function() {
+          fetch('fi.json')
+              .then(response => response.json())
+              .then(data => {
+                jsonData = data;
+  
+                  
+                  var container = document.getElementById('cards-container');
+
+                  // Loop through each card in the JSON data
+                  data.cards.forEach((card, index) => {
+                    var cardElement = document.createElement('div');
+                    cardElement.href = card.link; // Set the link only if it's a normal card
+                    cardElement.className = 'card-link';
+                  
+                    // Create the card content
+                    var cardContent = document.createElement('div');
+                  
+                    // Create the icon container
+                    var iconContainer = document.createElement('div');
+                    iconContainer.className = 'icon-container';
+                                      
+                    // Create the icon image element
+                    var icon = document.createElement('img');
+                    icon.src = card.icon; // Set the icon source based on the card.icon property
+                                      
+                    // Add the icon image to the icon container
+                    iconContainer.appendChild(icon);
+                                      
+                    // Create the card title and text
+                    var cardTitle = document.createElement('h2');
+                    var cardText = document.createElement('p');
+                    cardTitle.textContent = card.title;
+                    cardText.textContent = card.content;
+                                      
+                    // Add the icon container, title, and text to the card content
+                    cardContent.appendChild(iconContainer);
+                    cardContent.appendChild(cardTitle);
+                    cardContent.appendChild(cardText);
+                                      
+                    // Add the content to the card and add the card to the container
+                    cardElement.appendChild(cardContent);
+                    container.appendChild(cardElement);
+                  
+                    // Add an event listener to the card element to open the first page
+                    cardElement.addEventListener('click', function () {
+                      changePath(card.linkedCheckboxes);
+                      loadCheckboxes(card.linkedCheckboxes);
+                      document.querySelector('#page1 .lead h1').textContent = card.title; 
+                      document.querySelector('#page2 .lead h1').textContent = card.title;
+                      document.querySelector('#page3 .lead h1').textContent = card.title;
+                      document.querySelector('#page4 .lead h1').textContent = card.title;
+                      document.querySelector('#page5 .lead h1').textContent = card.title;
+                      goToPage(1);
+
+                      if (card.files) {
+                        // Show the file links container
+                        var fileLinksContainer = document.getElementById('fileLinksContainer');
+                        fileLinksContainer.style.display = 'block';
+                    
+                        // Clear any existing content
+                        fileLinksContainer.innerHTML = '';
+                    
+                        // Check if 'files' is an array and then iterate over it
+                        if (Array.isArray(card.files)) {
+                            card.files.forEach(function(file) {
+                                var div = document.createElement('div');
+                                var link = document.createElement('a');
+                                link.href = file;
+                                link.style.color = "#0064AF"; // Setting link color
+                                link.style.textDecoration = "none"; // Removing underline
+                                var fileName = file.split('/').pop(); // Extract the file name
+                                
+                                // Set the inner HTML with the new icon
+                                link.innerHTML = '<i class="bi bi-file-earmark-fill"></i>&nbsp;' + fileName;
+                                div.appendChild(link);
+                                fileLinksContainer.appendChild(div);
+                                fileLinksContainer.appendChild(document.createElement('br'));
+                            });
+                        } else if (typeof card.files === 'string') {
+                            var div = document.createElement('div');
+                            var link = document.createElement('a');
+                            link.href = card.files;
+                            link.style.color = "#0064AF"; // Setting link color
+                            link.style.textDecoration = "none"; // Removing underline
+                            var fileName = card.files.split('/').pop(); // Extract the file name
+                            
+                            // Set the inner HTML with the new icon
+                            link.innerHTML = '<i class="bi bi-file-earmark-fill"></i>&nbsp;' + fileName;
+                            div.appendChild(link);
+                            fileLinksContainer.appendChild(div);
+                        }
+                    } else {
+                        // Hide the file links container
+                        var fileLinksContainer = document.getElementById('fileLinksContainer');
+                        fileLinksContainer.style.display = 'none';
+                    }
+                    
+
+
+                      if (card.video) {
+                        // Show the video player
+                        var videoPlayer = document.getElementById('videoPlayer');
+                        videoPlayer.style.display = 'block';
+
+                        // Change the video source and load the video
+                        videoPlayer.src = card.video;
+                        videoPlayer.load();
+                      } else {
+                        // Hide the video player
+                        var videoPlayer = document.getElementById('videoPlayer');
+                        videoPlayer.style.display = 'none';
+                      }
+                      if (card.shortvideo) {
+                        // Show the video player
+                        var videoPlayer = document.getElementById('videoPlayer5');
+                        videoPlayer.style.display = 'block';
+                                            
+                        // Change the video source and load the video
+                        videoPlayer.src = card.shortvideo;
+                        videoPlayer.load();
+                    } else {
+                        // Hide the video player
+                        var videoPlayer = document.getElementById('videoPlayer5');
+                        videoPlayer.style.display = 'none';
+                    }
+
+                      document.getElementById('conversion-desc').textContent = card.desc;
+                      document.getElementById('linkToVideos').textContent = '(Ohjevideot saatavissa: https://ava.vaylapilvi.fi/ava/Muut/Paikkatietopalvelut/Vexline)'
+
+                    });
+
+                    // Get all the path-card elements
+                    var pathCards = document.getElementsByClassName('path-card');
+
+                    // Loop through each path-card
+                    for (var i = 0; i < pathCards.length; i++) {
+                      // Add an event listener to each path-card
+                      pathCards[i].addEventListener('click', function() {
+                      
+                        var dataPath = this.getAttribute('data-path');
+                      
+                        var card = data.cards.find(function(card) {
+                          return card.dataPath === dataPath;
+                        });
+
+                        function setIcons() {
+                          data.cards.forEach(function (card) {
+                            var pathCard = document.querySelector('.path-card[data-path="' + card.dataPath + '"]');
+                            var img = pathCard.querySelector('img');
+                            img.src = card.icon;
+                          });
+                        }
+
+                        // Call the function to set the icons
+                        setIcons();
+                      
+                        if (card) {
+                          changePath(card.linkedCheckboxes);
+                          loadCheckboxes(card.linkedCheckboxes); // Pass configName
+                          goToPage(1);
+                          document.querySelector('#page1 .lead h1').textContent = card.title;
+                          document.querySelector('#page2 .lead h1').textContent = card.title;
+                          document.querySelector('#page3 .lead h1').textContent = card.title;
+                          document.querySelector('#page4 .lead h1').textContent = card.title;
+                          document.querySelector('#page5 .lead h1').textContent = card.title;
+
+                          document.getElementById('conversion-desc').textContent = card.desc;
+                        }
+
+                        if (card.files) {
+                              // Show the file links container
+                              var fileLinksContainer = document.getElementById('fileLinksContainer');
+                              fileLinksContainer.style.display = 'block';
+                                                  
+                              // Clear any existing content
+                              fileLinksContainer.innerHTML = '';
+                                                  
+                              // If 'files' is an array, loop through it
+                              if (Array.isArray(card.files)) {
+                                  card.files.forEach(function(file) {
+                                      var div = document.createElement('div');
+                                      var link = document.createElement('a');
+                                      link.href = file;
+                                      var fileName = file.split('/').pop();  // Get the file name
+                                      link.innerHTML = '<span class="glyphicon glyphicon-file"></span>&nbsp;' + fileName;
+                                      div.appendChild(link);
+                                      fileLinksContainer.appendChild(div);
+                                      fileLinksContainer.appendChild(document.createElement('br'));
+                                  });
+                              }
+                              // If 'files' is a string, just create one link
+                              else if (typeof card.files === 'string') {
+                                  var div = document.createElement('div');
+                                  var link = document.createElement('a');
+                                  link.href = card.files;
+                                  var fileName = card.files.split('/').pop();  // Get the file name
+                                  link.innerHTML = '<span class="glyphicon glyphicon-file"></span>&nbsp;' + fileName;
+                                  div.appendChild(link);
+                                  fileLinksContainer.appendChild(div);
+                              }
+                          } else {
+                              // Hide the file links container
+                              var fileLinksContainer = document.getElementById('fileLinksContainer');
+                              fileLinksContainer.style.display = 'none';
+                          }
+
+                        if (card.video) {
+                          // Show the video player
+                          var videoPlayer = document.getElementById('videoPlayer');
+                          videoPlayer.style.display = 'block';
+
+                          // Change the video source and load the video
+                          videoPlayer.src = card.video;
+                          videoPlayer.load();
+                        } else {
+                          // Hide the video player
+                          var videoPlayer = document.getElementById('videoPlayer');
+                          videoPlayer.style.display = 'none';
+                        }
+                        if (card.shortvideo) {
+                            // Show the video player
+                            var videoPlayer = document.getElementById('videoPlayer5');
+                            videoPlayer.style.display = 'block';
+                                            
+                            // Change the video source and load the video
+                            videoPlayer.src = card.shortvideo;
+                            videoPlayer.load();
+                        } else {
+                            // Hide the video player
+                            var videoPlayer = document.getElementById('videoPlayer5');
+                            videoPlayer.style.display = 'none';
+                        }
+                        });
+                      }
+
+                  });
+                  
+                  goToPage(0);
+              });
+      };
+      
+  </script>
+</body>
+</html>

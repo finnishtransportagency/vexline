@@ -1,0 +1,32 @@
+{
+  "name": "vkm",
+  "version": "1.0.0",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-regular-svg-icons": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.6.8",
+    "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.1",
+    "doctest": "0.17.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.19.2",
+    "g": "^2.0.1",
+    "multer": "^1.4.5-lts.1",
+    "papaparse": "^5.4.1",
+    "ramda": "0.27.2",
+    "streamifier": "0.1.1",
+    "wkt": "0.1.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "postinstall": "node -e \"try { require('fs').symlinkSync(require('path').resolve('node_modules/@bower_components'), 'bower_components', 'junction') } catch (e) { }\"",
+    "start": "node --harmony server.js",
+    "test": "doctest --nodejs --harmony --module commonjs lib/convert.js"
+  },
+  "engines": {
+    "yarn": ">= 1.0.0"
+  }
+}

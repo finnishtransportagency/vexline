@@ -1,0 +1,14 @@
+# gitignore
+node_modules
+bower_components
+*.log
+.env
+dist
+build
+tmp
+*.tmp
+.git
+Dockerfile*
+docker-compose*
+README.md
+LICENSE
