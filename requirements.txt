@@ -5,7 +5,7 @@ click-plugins==1.1.1
 cligj==0.7.2
 colorama==0.4.6
 fiona==1.10b1
-geopandas==0.14.1
+geopandas==1.1.2
 numpy==1.26.2
 packaging==23.2
 pandas==2.1.3
